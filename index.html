@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#fff4f7">
+<title>Pair & Draw — make something together</title>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{--ink:#573d4a;--muted:#967d89;--pink:#f5a9bf;--rose:#e9789b;--cream:#fff8f5;--line:#f2dce4;--lav:#eee7ff}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:ui-rounded,"Nunito",system-ui,-apple-system,sans-serif;background:radial-gradient(circle at 10% 0%,#ffe4ec 0,transparent 32%),radial-gradient(circle at 100% 20%,#eee7ff 0,transparent 30%),#fff9f7;min-height:100vh}
+button,input{font:inherit}button{cursor:pointer;border:0}
+.wrap{max-width:1180px;margin:auto;padding:22px 20px 36px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:44px;height:44px;border-radius:15px;background:linear-gradient(145deg,#ffb5c9,#dca9ef);display:grid;place-items:center;font-size:23px;box-shadow:0 8px 20px #e9b5c866}
+h1{font-size:22px;margin:0;letter-spacing:-.6px}.tag{font-size:12px;color:var(--muted);margin-top:2px}
+.status{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:9px 13px;font-size:12px;color:var(--muted);box-shadow:0 4px 14px #80556a0b}.dot{width:8px;height:8px;background:#e8b2c2;border-radius:50%}.dot.on{background:#69bd91;box-shadow:0 0 0 4px #69bd9122}
+.hero{text-align:center;padding:14px 0 22px}.eyebrow{color:#d66f91;font-size:12px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase}.hero h2{font-size:clamp(26px,4vw,39px);letter-spacing:-1.4px;margin:8px 0 7px}.hero p{margin:0;color:var(--muted);font-size:14px}
+.connect{max-width:760px;margin:0 auto 18px;background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:0 12px 35px #8c60700d;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.connect-card{background:#fff8fa;border:1px solid #f7e5eb;border-radius:16px;padding:14px}.connect-card h3{font-size:14px;margin:0 0 5px}.connect-card p{font-size:12px;color:var(--muted);margin:0 0 12px;line-height:1.5}
+.fieldrow{display:flex;gap:7px}.field{min-width:0;width:100%;border:1px solid var(--line);border-radius:11px;padding:10px 11px;background:#fff;color:var(--ink);outline:none}.field:focus{border-color:#e99bb3;box-shadow:0 0 0 3px #f7dce6}
+.btn{padding:10px 14px;border-radius:11px;font-weight:750;font-size:12px;white-space:nowrap;background:linear-gradient(135deg,#ed91ad,#d99be8);color:white;box-shadow:0 5px 12px #d88fae33}.btn.secondary{background:#fff;color:#bd6e8b;border:1px solid #f0cad7;box-shadow:none}.btn:disabled{opacity:.5;cursor:not-allowed}
+.roomline{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 12px;padding:0 3px}.roomname{font-size:13px;font-weight:800}.roomhint{font-size:11px;color:var(--muted)}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 245px;gap:14px;align-items:start}
+.boardcard,.sidecard{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 35px #8c60700c;overflow:hidden}
+.boardtop{padding:12px 15px;border-bottom:1px solid #f7eaf0;display:flex;align-items:center;justify-content:space-between;gap:8px}.avatars{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}.avatar{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:#ffe1eb;font-size:14px}.avatar.two{background:#eee4ff}.canvaswrap{padding:12px;background:#fffdfd}.canvasbox{height:460px;position:relative;border:1px dashed #efcbd8;border-radius:13px;overflow:hidden;background-color:#fff; background-image:radial-gradient(#f6e8ed 1px,transparent 1px);background-size:19px 19px;touch-action:none}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:11px 13px;border-top:1px solid #f7eaf0}.tool{width:35px;height:35px;border-radius:10px;background:#fff6f9;color:#8e6575;border:1px solid #f4dce5;font-size:16px}.tool.active{background:#ffe0e9;border-color:#e995b1;color:#c85d83}.swatches{display:flex;gap:6px;align-items:center;margin-left:3px}.swatch{width:21px;height:21px;border-radius:50%;border:2px solid white;outline:1px solid #ead9e0}.swatch.active{outline:2px solid #c86e91}.size{width:76px;accent-color:#dd83a2}.spacer{flex:1}
+.sidecard{padding:14px}.sidecard h3{font-size:14px;margin:0 0 10px}.chatlog{height:190px;overflow:auto;background:#fff9fb;border:1px solid #f6e5ec;border-radius:12px;padding:9px;display:flex;flex-direction:column;gap:7px}.msg{font-size:12px;line-height:1.4;max-width:95%;background:#ffe8ef;border-radius:11px 11px 11px 3px;padding:7px 9px;overflow-wrap:anywhere}.msg.me{align-self:flex-end;background:#eee7ff;border-radius:11px 11px 3px 11px}.msg small{display:block;font-size:9px;color:#a18492;margin-bottom:2px}.chatinput{display:flex;gap:6px;margin-top:8px}.chatinput input{font-size:12px;padding:9px}.chatinput button{padding:8px 11px}.side-divider{height:1px;background:#f4e5eb;margin:15px 0}.tips{font-size:11px;color:var(--muted);line-height:1.6}.tips b{color:#8a6072}.bottomnote{text-align:center;font-size:11px;color:#aa909b;margin-top:18px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#5e4351;color:#fff;padding:10px 15px;border-radius:99px;font-size:12px;box-shadow:0 8px 25px #39202c33;opacity:0;pointer-events:none;transition:.2s;z-index:9}.toast.show{opacity:1}
+@media(max-width:800px){.workspace{grid-template-columns:1fr}.sidecard{display:grid;grid-template-columns:1fr 1fr;gap:12px}.sidecard h3{grid-column:1/-1}.side-divider{display:none}.chatlog{height:140px}.connect{grid-template-columns:1fr}.canvasbox{height:min(58vh,440px)}}
+@media(max-width:480px){.wrap{padding:15px 12px 26px}.status{font-size:10px;padding:8px}.hero{padding-top:10px}.sidecard{display:block}.side-divider{display:block}.canvasbox{height:54vh;min-height:300px}.roomhint{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div class="brand"><div class="logo">💗</div><div><h1>Pair & Draw</h1><div class="tag">two hearts, one canvas</div></div></div>
+ <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Not connected yet</span></div>
+</header>
+<section class="hero"><div class="eyebrow">a little space for the two of you</div><h2>Make memories, one doodle at a time.</h2><p>Create a private room, invite your person, and draw together in real time. ✨</p></section>
+<section class="connect">
+ <div class="connect-card"><h3>💌 Start a new room</h3><p>Create a private room and send your partner the invite link or room code.</p><button class="btn" id="createBtn">Create our room</button></div>
+ <div class="connect-card"><h3>💕 Join your partner</h3><p>Have a room code? Enter it here and jump onto the same canvas.</p><div class="fieldrow"><input class="field" id="roomInput" maxlength="6" placeholder="6-letter code" autocomplete="off"><button class="btn secondary" id="joinBtn">Join</button></div></div>
+</section>
+<div class="roomline"><div><div class="roomname" id="roomTitle">Your shared canvas</div><div class="roomhint" id="roomHint">Create or join a room to invite your partner.</div></div><button class="btn secondary" id="copyBtn" disabled>Copy invite link</button></div>
+<section class="workspace">
+ <div class="boardcard">
+  <div class="boardtop"><div class="avatars"><span class="avatar">🌷</span><span id="youLabel">You</span><span class="avatar two">🧸</span><span id="partnerLabel">Partner · waiting</span></div><span class="roomhint">✦ draw at the same time</span></div>
+  <div class="canvaswrap"><div class="canvasbox"><canvas id="board"></canvas></div></div>
+  <div class="toolbar">
+   <button class="tool active" id="penBtn" title="Pen">✏️</button><button class="tool" id="eraserBtn" title="Eraser">🧽</button><button class="tool" id="undoBtn" title="Undo your last stroke">↶</button><button class="tool" id="clearBtn" title="Clear canvas">🗑️</button>
+   <div class="swatches" id="swatches"></div><input class="size" id="sizeInput" type="range" min="2" max="24" value="5" title="Brush size"><span class="roomhint" id="sizeLabel">5 px</span><span class="spacer"></span><button class="btn secondary" id="saveBtn">↓ Save art</button>
+  </div>
+ </div>
+ <aside class="sidecard">
+  <h3>💬 Little love notes</h3>
+  <div class="chatlog" id="chatlog"><div class="msg"><small>Pair & Draw</small>Your little chat lives here. Say hi! 💗</div></div>
+  <div class="chatinput"><input class="field" id="chatInput" placeholder="Send a sweet note…" maxlength="180"><button class="btn" id="sendBtn">Send</button></div>
+  <div class="side-divider"></div>
+  <div><h3>🌸 A tiny reminder</h3><div class="tips"><b>Both partners can:</b><br>• Draw and erase together<br>• Pick their own colours<br>• Undo their last stroke<br>• Save the finished artwork<br><br>Room links are private to whoever you share them with. Anyone who has the code can join, so share it only with your partner.</div></div>
+ </aside>
+</section>
+<div class="bottomnote">Made with a little extra love · Pair & Draw 💞</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+const canvas=$('board'), ctx=canvas.getContext('2d');
+const palette=['#e95f88','#f39bba','#9b79d0','#6f9ed7','#62b99b','#f0b45f','#594b59','#222222','#ffffff'];
+let color=palette[0], brush=5, erasing=false, drawing=false, current=null, strokes=[], myStrokeIds=[], peer=null, connections=[], room='', isHost=false, connected=false, partnerCount=0;
+const clientId=Math.random().toString(36).slice(2,8);
+function toast(s){$('toast').textContent=s;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2300)}
+function setStatus(s,on=false){$('statusText').textContent=s;$('statusDot').classList.toggle('on',on)}
+function fitCanvas(){const r=canvas.getBoundingClientRect(),dpr=Math.max(1,window.devicePixelRatio||1);const old=document.createElement('canvas');old.width=canvas.width;old.height=canvas.height;old.getContext('2d').drawImage(canvas,0,0);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);if(old.width&&old.height)ctx.drawImage(old,0,0,old.width,old.height,0,0,r.width,r.height);else redraw()}
+function drawStroke(s){if(!s.points||!s.points.length)return;const w=canvas.clientWidth,h=canvas.clientHeight;ctx.save();ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=s.size||5;ctx.strokeStyle=s.erase?'#ffffff':s.color;ctx.fillStyle=s.erase?'#ffffff':s.color;ctx.beginPath();ctx.moveTo(s.points[0].x*w,s.points[0].y*h);for(let i=1;i<s.points.length;i++)ctx.lineTo(s.points[i].x*w,s.points[i].y*h);if(s.points.length===1){ctx.arc(s.points[0].x*w,s.points[0].y*h,(s.size||5)/2,0,Math.PI*2);ctx.fill()}else ctx.stroke();ctx.restore()}
+function redraw(){ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);strokes.forEach(drawStroke)}
+function resize(){const dpr=Math.max(1,window.devicePixelRatio||1),r=canvas.getBoundingClientRect();canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);redraw()}
+new ResizeObserver(resize).observe(canvas);
+function point(e){const r=canvas.getBoundingClientRect();return{x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))}}
+function send(data){connections.forEach(c=>{if(c.open)try{c.send(data)}catch(e){}})}
+function addStroke(s,remote=false){if(strokes.some(x=>x.id===s.id))return;strokes.push(s);if(strokes.length>300)strokes.shift();drawStroke(s);if(!remote)send({type:'stroke',stroke:s})}
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();drawing=true;canvas.setPointerCapture(e.pointerId);current={id:clientId+'-'+Date.now()+'-'+Math.random(),owner:clientId,color,erase:erasing,size:brush,points:[point(e)]};drawStroke(current)});
+canvas.addEventListener('pointermove',e=>{if(!drawing||!current)return;e.preventDefault();current.points.push(point(e));redraw();drawStroke(current)});
+function finishStroke(){if(!drawing||!current)return;drawing=false;myStrokeIds.push(current.id);addStroke(current);current=null}
+canvas.addEventListener('pointerup',finishStroke);canvas.addEventListener('pointercancel',finishStroke);canvas.addEventListener('pointerleave',e=>{if(e.buttons===0)finishStroke()});
+function setupPeer(id){if(!window.Peer){toast('Could not load the connection service. Check your internet.');return}setStatus('Connecting…');peer=new Peer(id,{debug:0});peer.on('open',()=>{setStatus(isHost?'Room ready · waiting for partner':'Finding room…',isHost);if(isHost){$('roomTitle').textContent='Our room · '+room;$('roomHint').textContent='Send your invite link or code to your partner.';$('copyBtn').disabled=false;history.replaceState({},'',location.pathname+'?room='+room)}});peer.on('connection',c=>attach(c));peer.on('error',err=>{console.error(err);if(err.type==='unavailable-id')toast('That room code is already in use. Create a new room.');else if(err.type==='peer-unavailable')toast('Room not found. Check the code and try again.');else toast('Connection issue: '+err.type);setStatus('Connection issue')});peer.on('disconnected',()=>setStatus('Reconnecting…'))}
+function attach(c){connections.push(c);c.on('open',()=>{partnerCount=1;connected=true;setStatus('You’re together 💗',true);$('partnerLabel').textContent='Partner · here';$('roomHint').textContent='Connected! Your drawings sync live.';if(isHost)c.send({type:'snapshot',strokes});else c.send({type:'hello'});});c.on('data',data=>{if(!data||!data.type)return;if(data.type==='stroke'){if(!strokes.some(x=>x.id===data.stroke.id)){strokes.push(data.stroke);redraw()}if(isHost)send(data)}else if(data.type==='snapshot'){strokes=data.strokes||[];redraw()}else if(data.type==='hello'&&isHost){c.send({type:'snapshot',strokes})}else if(data.type==='chat'){if(data.from!==clientId)appendChat(data.text,'Partner');if(isHost)send(data)}else if(data.type==='undo'){strokes=strokes.filter(s=>s.id!==data.id);redraw();if(isHost)send(data)}else if(data.type==='clear'){strokes=[];redraw();if(isHost)send(data)}});c.on('close',()=>{connected=false;partnerCount=0;$('partnerLabel').textContent='Partner · waiting';setStatus('Partner disconnected')})}
+function makeRoom(){room=Math.random().toString(36).slice(2,8).toUpperCase();isHost=true;setupPeer('pairdraw-'+room.toLowerCase());}
+function joinRoom(code){room=code.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);if(room.length!==6){toast('Please enter the 6-character room code.');return}isHost=false;setupPeer('pairdraw-guest-'+clientId);peer&&peer.on('open',()=>{});const start=()=>{const c=peer.connect('pairdraw-'+room.toLowerCase(),{reliable:true});attach(c)};if(peer&&peer.open)start();else if(peer)peer.on('open',start)}
+$('createBtn').onclick=()=>{if(peer){toast('You already have a room open.');return}makeRoom()};
+$('joinBtn').onclick=()=>{if(peer){toast('You are already connected or connecting.');return}joinRoom($('roomInput').value)};
+$('roomInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('joinBtn').click()});
+$('copyBtn').onclick=async()=>{const link=location.origin+location.pathname+'?room='+room;try{await navigator.clipboard.writeText(link);toast('Invite link copied! 💌')}catch(e){await navigator.clipboard.writeText(room);toast('Room code copied: '+room)}};
+if(new URLSearchParams(location.search).get('room')){$('roomInput').value=new URLSearchParams(location.search).get('room').toUpperCase();$('roomHint').textContent='Your partner sent you an invite. Tap Join to connect.'}
+function appendChat(text,who){const el=document.createElement('div');el.className='msg'+(who==='You'?' me':'');const sm=document.createElement('small');sm.textContent=who;el.append(sm,document.createTextNode(text));$('chatlog').append(el);$('chatlog').scrollTop=$('chatlog').scrollHeight}
+function sendChat(){const v=$('chatInput').value.trim();if(!v)return;appendChat(v,'You');send({type:'chat',text:v,from:clientId});$('chatInput').value=''}
+$('sendBtn').onclick=sendChat;$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat()});
+function setTool(erase){erasing=erase;$('penBtn').classList.toggle('active',!erase);$('eraserBtn').classList.toggle('active',erase)}
+$('penBtn').onclick=()=>setTool(false);$('eraserBtn').onclick=()=>setTool(true);
+palette.forEach((c,i)=>{const b=document.createElement('button');b.className='swatch'+(!i?' active':'');b.style.background=c;b.title=c;b.onclick=()=>{color=c;document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('active'));b.classList.add('active');setTool(false)};$('swatches').append(b)});
+$('sizeInput').oninput=e=>{brush=+e.target.value;$('sizeLabel').textContent=brush+' px'};
+$('undoBtn').onclick=()=>{const id=myStrokeIds.pop();if(!id){toast('Nothing to undo yet.');return}strokes=strokes.filter(s=>s.id!==id);redraw();send({type:'undo',id})};
+$('clearBtn').onclick=()=>{if(!confirm('Clear the shared canvas for both of you?'))return;strokes=[];myStrokeIds=[];redraw();send({type:'clear'})};
+$('saveBtn').onclick=()=>{const a=document.createElement('a');a.download='pair-and-draw.png';a.href=canvas.toDataURL('image/png');a.click()};
+resize();
+</script>
+</body>
+</html>
